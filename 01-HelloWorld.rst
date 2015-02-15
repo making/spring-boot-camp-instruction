@@ -1,4 +1,4 @@
-Spring BootでHello World
+[事前準備] Spring BootでHello World
 ********************************************************************************
 
 Spring BootプロジェクトをMaven Archetypeから作ります。今回は拙作の\ `spring-boot-docker-blank <https://github.com/making/spring-boot-docker-blank>`_\ を使用します。
