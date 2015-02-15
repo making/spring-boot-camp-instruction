@@ -4,7 +4,7 @@
 Spring BootプロジェクトをMaven Archetypeから作ります。今回は拙作の\ `spring-boot-docker-blank <https://github.com/making/spring-boot-docker-blank>`_\ を使用します。
 このMaven ArchetypeにはDockerデプロイするための設定が予め行われいます。
 
-以下のコマンドでプロジェクトを作成しましょう。
+以下のコマンドでプロジェクトを作成しましょう。ターミナルまたはコマンドプロンプトに貼付けてください。
 
 * Bashを使っている場合
 
@@ -30,6 +30,27 @@ Spring BootプロジェクトをMaven Archetypeから作ります。今回は拙
      -DgroupId=kanjava^
      -DartifactId=kusokora^
      -Dversion=1.0.0-SNAPSHOT
+
+生成されたプロジェクトは以下のような構造になっています。
+
+.. code-block:: console
+
+    kusokora/
+    ├── pom.xml
+    └── src
+        ├── main
+        │   ├── docker ... Docker用ファイル格納フォルダ。(Dockerデプロイするときのみ使う)
+        │   │   ├── Dockerfile.txt
+        │   │   └── Dockerrun.aws.json
+        │   ├── java ...
+        │   │   └── kanjava
+        │   │       └── App.java ... アプリケーションコードを書くJavaファイル。今回のハンズオンでは基本的にこのファイルしか使わない。
+        │   └── resources
+        │       └── application.yml ... Spring Bootの設定ファイル。無くても良い。
+        └── test ... テスト用フォルダ。今回は使わない。
+            ├── java
+            └── resources
+
 
 以下のようなpom.xmlになっています。簡単に説明を加えたので、気になる人は見ておいてください。
 
@@ -259,5 +280,8 @@ targetの下にkusokora.jarが出来ています。これを実行してくだ�
       main.show-banner: false # 起動時にバナー表示をOFFにする
 
 
+.. note::
+
+    Dockerデプロイも試したい場合は、「\ :doc:`10-Docker`\ 」を先にみてください。
 
 本章の内容を修了したらハッシュタグ「#kanjava_sbc #sbc01」をつけてツイートしてください。
