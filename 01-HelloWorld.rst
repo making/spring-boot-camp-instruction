@@ -2,7 +2,7 @@
 ********************************************************************************
 
 Spring BootプロジェクトをMaven Archetypeから作ります。今回は拙作の\ `spring-boot-docker-blank <https://github.com/making/spring-boot-docker-blank>`_\ を使用します。
-このMaven ArchetypeにはDockerデプロイするための設定が予め行われいます。
+このMaven ArchetypeにはDockerデプロイするための設定が予め行われています。
 
 以下のコマンドでプロジェクトを作成しましょう。ターミナルまたはコマンドプロンプトに貼付けてください。
 
@@ -44,7 +44,7 @@ Spring BootプロジェクトをMaven Archetypeから作ります。今回は拙
         │   ├── docker ... Docker用ファイル格納フォルダ。(Dockerデプロイするときのみ使う)
         │   │   ├── Dockerfile.txt
         │   │   └── Dockerrun.aws.json
-        │   ├── java ...
+        │   ├── java
         │   │   └── kanjava
         │   │       └── App.java ... アプリケーションコードを書くJavaファイル。今回のハンズオンでは基本的にこのファイルしか使わない。
         │   └── resources
