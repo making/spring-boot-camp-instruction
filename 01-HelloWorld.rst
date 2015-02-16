@@ -17,6 +17,7 @@ Spring BootプロジェクトをMaven Archetypeから作ります。今回は拙
      -DgroupId=kanjava\
      -DartifactId=kusokora\
      -Dversion=1.0.0-SNAPSHOT
+    $ cd kusokora
 
 
 * コマンドプロンプトを使っている場合
@@ -30,6 +31,7 @@ Spring BootプロジェクトをMaven Archetypeから作ります。今回は拙
      -DgroupId=kanjava^
      -DartifactId=kusokora^
      -Dversion=1.0.0-SNAPSHOT
+    $ cd kusokora
 
 生成されたプロジェクトは以下のような構造になっています。
 
@@ -239,6 +241,25 @@ http://localhost:8080\ にアクセスしてください。「Hello World!」が
     $ mvn spring-boot:run
 
 同様に起動しますね。
+
+
+.. note::
+
+    この雛形プロジェクトには"Spring Boot Actuator"が設定されており、環境変数やメトリクス、ヘルスチェックなど非機能面のサポートが初めからされています。
+    次のURLにアクセスして、色々な情報を取得してみてください。
+
+    * http://localhost:8080/env
+    * http://localhost:8080/health
+    * http://localhost:8080/configprops
+    * http://localhost:8080/mappings
+    * http://localhost:8080/metrics
+    * http://localhost:8080/beans
+    * http://localhost:8080/trace
+    * http://localhost:8080/dump
+    * http://localhost:8080/info
+
+    Chromeを利用している場合は、\ `JSONView <https://chrome.google.com/webstore/detail/jsonview/chklaanhfefbnpoihckbnefhakgolnmc>`_\ をインストールしておくと便利です。
+
 
 今度は実行可能jarを作ります。
 
