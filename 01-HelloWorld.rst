@@ -271,7 +271,7 @@ targetの下にkusokora.jarが出来ています。これを実行してくだ�
 
 .. code-block:: console
 
-    $ mvn -jar target/kusokora.jar
+    $ java -jar target/kusokora.jar
 
 これも同様に起動します。
 
@@ -286,7 +286,7 @@ targetの下にkusokora.jarが出来ています。これを実行してくだ�
 
 .. code-block:: console
 
-    $ mvn -jar target/kusokora.jar --server.port=9999
+    $ java -jar target/kusokora.jar --server.port=9999
 
 で指定できます。今度は\ http://localhost:9999\ にアクセスできます。
 
