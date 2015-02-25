@@ -202,7 +202,7 @@
 「\ :doc:`02-OpenCV`\ 」では1メソッドにベタ書きしたので、今回は以下のように顔検出処理と顔変換処理を分けて、それぞれ別クラスに定義します。
 
 .. code-block:: java
-    :emphasize-lines: 3-4,7,26-37
+    :emphasize-lines: 3-4,7,11,26-37
 
     package kanjava;
 
@@ -245,6 +245,283 @@
 
 実際の処理を埋めましょう。
 
+.. code-block:: java
+    :emphasize-lines: 3-5,12-14,35-67,72-82
 
+    package kanjava;
+
+    import org.slf4j.Logger;
+    import org.slf4j.LoggerFactory;
+    import org.springframework.beans.factory.annotation.Value;
+    import org.springframework.boot.SpringApplication;
+    import org.springframework.boot.autoconfigure.SpringBootApplication;
+    import org.springframework.stereotype.Component;
+    import org.springframework.web.bind.annotation.RequestMapping;
+    import org.springframework.web.bind.annotation.RestController;
+
+    import javax.annotation.PostConstruct;
+    import java.io.File;
+    import java.io.IOException;
+    import java.util.function.BiConsumer;
+
+    import static org.bytedeco.javacpp.opencv_core.*;
+    import static org.bytedeco.javacpp.opencv_objdetect.*;
+
+    @SpringBootApplication
+    @RestController
+    public class App {
+        public static void main(String[] args) {
+            SpringApplication.run(App.class, args);
+        }
+
+        @RequestMapping(value = "/")
+        String hello() {
+            return "Hello World!";
+        }
+    }
+
+    @Component
+    class FaceDetector {
+        // 分類器のパスをプロパティから取得できるようにする
+        @Value("${classifierFile:classpath:/haarcascade_frontalface_default.xml}")
+        File classifierFile;
+
+        CascadeClassifier classifier;
+
+        static final Logger log = LoggerFactory.getLogger(FaceDetector.class);
+
+        public void detectFaces(Mat source, BiConsumer<Mat, Rect> detectAction) {
+            // 顔認識結果
+            Rect faceDetections = new Rect();
+            // 顔認識実行
+            classifier.detectMultiScale(source, faceDetections);
+            // 認識した顔の数
+            int numOfFaces = faceDetections.limit();
+            log.info("{} faces are detected!", numOfFaces);
+            for (int i = 0; i < numOfFaces; i++) {
+                // i番目の認識結果
+                Rect r = faceDetections.position(i);
+                // 1件ごとの認識結果を変換処理(関数)にかける
+                detectAction.accept(source, r);
+            }
+        }
+
+        @PostConstruct // 初期化処理。DIでプロパティがセットされたあとにclassifierインスタンスを生成したいのでここで書く。
+        void init() throws IOException {
+            if (log.isInfoEnabled()) {
+                log.info("load {}", classifierFile.toPath());
+            }
+            // 分類器の読み込み
+            this.classifier = new CascadeClassifier(classifierFile.toPath()
+                    .toString());
+        }
+    }
+
+    class FaceTranslator {
+        public static void duker(Mat source, Rect r) { // BiConsumer<Mat, Rect>で渡せるようにする
+            int x = r.x(), y = r.y(), h = r.height(), w = r.width();
+            // Dukeのように描画する
+            // 上半分の黒四角
+            rectangle(source, new Point(x, y), new Point(x + w, y + h / 2),
+                    new Scalar(0, 0, 0, 0), -1, CV_AA, 0);
+            // 下半分の白四角
+            rectangle(source, new Point(x, y + h / 2), new Point(x + w, y + h),
+                    new Scalar(255, 255, 255, 0), -1, CV_AA, 0);
+            // 中央の赤丸
+            circle(source, new Point(x + h / 2, y + h / 2), (w + h) / 12,
+                    new Scalar(0, 0, 255, 0), -1, CV_AA, 0);
+        }
+    }
+
+次に、この画像処理ロジックをControllerから叩きます。処理結果の画像をレスポンスとして返すのにJavaCVから扱いやすい\ ``BufferedImage``\ をそのままシリアライズさせましょう。
+\ ``BufferedImage``\ のシリアライズはSpring Bootのデフォルトでは対応していないのですが、特定の型に対するリクエスト・レスポンスを扱うための\ ``HttpMessageConverter``\ の\ ``BufferedImage``\
+は用意されています。\ ``org.springframework.http.converter.BufferedImageHttpMessageConverter``\ です。
+
+Spring Bootで新しい\ ``HttpMessageConverter``\ を追加したい場合、対象の\ ``HttpMessageConverter``\ をBean定義するだけで良いです。
+
+Spring BootでBean定義する場合は通常、\ ``@Bean``\ を使ってJavaで定義します。\ ``@Configuration``\  (またはそれを内包する\ ``@SpringBootApplication``\ ) がついたクラスの中で、
+インスタンスを生成するメソッドを書き、そのメソッドに\ ``@Bean``\ をつければ良いです。
+
+今回の場合、以下のようになります。
+
+.. code-block:: java
+
+    @Bean
+    BufferedImageHttpMessageConverter bufferedImageHttpMessageConverter() {
+        return new BufferedImageHttpMessageConverter();
+    }
+
+それでは画像変換を行うControllerの処理を追加しましょう。
+
+.. code-block:: java
+    :emphasize-lines: 5,9-10,13-14,18-20,35-41,48-55
+
+    package kanjava;
+
+    import org.slf4j.Logger;
+    import org.slf4j.LoggerFactory;
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.beans.factory.annotation.Value;
+    import org.springframework.boot.SpringApplication;
+    import org.springframework.boot.autoconfigure.SpringBootApplication;
+    import org.springframework.context.annotation.Bean;
+    import org.springframework.http.converter.BufferedImageHttpMessageConverter;
+    import org.springframework.stereotype.Component;
+    import org.springframework.web.bind.annotation.RequestMapping;
+    import org.springframework.web.bind.annotation.RequestMethod;
+    import org.springframework.web.bind.annotation.RequestParam;
+    import org.springframework.web.bind.annotation.RestController;
+
+    import javax.annotation.PostConstruct;
+    import javax.imageio.ImageIO;
+    import javax.servlet.http.Part;
+    import java.awt.image.BufferedImage;
+    import java.io.File;
+    import java.io.IOException;
+    import java.util.function.BiConsumer;
+
+    import static org.bytedeco.javacpp.opencv_core.*;
+    import static org.bytedeco.javacpp.opencv_objdetect.*;
+
+    @SpringBootApplication
+    @RestController
+    public class App {
+        public static void main(String[] args) {
+            SpringApplication.run(App.class, args);
+        }
+
+        @Autowired // FaceDetectorをインジェクション
+        FaceDetector faceDetector;
+
+        @Bean // HTTPのリクエスト・レスポンスボディにBufferedImageを使えるようにする
+        BufferedImageHttpMessageConverter bufferedImageHttpMessageConverter() {
+            return new BufferedImageHttpMessageConverter();
+        }
+
+        @RequestMapping(value = "/")
+        String hello() {
+            return "Hello World!";
+        }
+
+        // curl -v -F 'file=@hoge.jpg' http://localhost:8080/duker > after.jpg という風に使えるようにする
+        @RequestMapping(value = "/duker", method = RequestMethod.POST) // POSTで/dukerへのリクエストに対する処理
+        BufferedImage duker(@RequestParam Part file /* パラメータ名fileのマルチパートリクエストのパラメータを取得 */) throws IOException {
+            Mat source = Mat.createFrom(ImageIO.read(file.getInputStream())); // Part -> BufferedImage -> Matと変換
+            faceDetector.detectFaces(source, FaceTranslator::duker); // 対象のMatに対して顔認識。認識結果に対してduker関数を適用する。
+            BufferedImage image = source.getBufferedImage(); // Mat -> BufferedImage
+            return image;
+        }
+    }
+
+    @Component
+    class FaceDetector {
+        @Value("${classifierFile:classpath:/haarcascade_frontalface_default.xml}")
+        File classifierFile;
+
+        CascadeClassifier classifier;
+
+        static final Logger log = LoggerFactory.getLogger(FaceDetector.class);
+
+        public void detectFaces(Mat source, BiConsumer<Mat, Rect> detectAction) {
+            // 顔認識結果
+            Rect faceDetections = new Rect();
+            // 顔認識実行
+            classifier.detectMultiScale(source, faceDetections);
+            // 認識した顔の数
+            int numOfFaces = faceDetections.limit();
+            log.info("{} faces are detected!", numOfFaces);
+            for (int i = 0; i < numOfFaces; i++) {
+                // i番目の認識結果
+                Rect r = faceDetections.position(i);
+                // 認識結果を変換処理にかける
+                detectAction.accept(source, r);
+            }
+        }
+
+        @PostConstruct
+        void init() throws IOException {
+            if (log.isInfoEnabled()) {
+                log.info("load {}", classifierFile.toPath());
+            }
+            // 分類器の読み込み
+            this.classifier = new CascadeClassifier(classifierFile.toPath()
+                    .toString());
+        }
+    }
+
+    class FaceTranslator {
+        public static void duker(Mat source, Rect r) {
+            int x = r.x(), y = r.y(), h = r.height(), w = r.width();
+            // Dukeのように描画する
+            // 上半分の黒四角
+            rectangle(source, new Point(x, y), new Point(x + w, y + h / 2),
+                    new Scalar(0, 0, 0, 0), -1, CV_AA, 0);
+            // 下半分の白四角
+            rectangle(source, new Point(x, y + h / 2), new Point(x + w, y + h),
+                    new Scalar(255, 255, 255, 0), -1, CV_AA, 0);
+            // 中央の赤丸
+            circle(source, new Point(x + h / 2, y + h / 2), (w + h) / 12,
+                    new Scalar(0, 0, 255, 0), -1, CV_AA, 0);
+        }
+    }
+
+
+実行する前に、「\ :doc:`02-OpenCV`\ 」で使用した\ :file:`haarcascade_frontalface_default.xml`\ を\ :file:`src/main/resources`\ にコピーしましょう。以下のように\ ``wget``\ しても構いません。
+
+.. code-block:: console
+
+    $ wget https://github.com/making/hello-cv/raw/duker/src/main/resources/haarcascade_frontalface_default.xml
+
+
+ファイルをコピーしたら、早速起動しましょう。
+
+.. code-block:: console
+
+    $ mvn spring-boot:run
+
+\ ``main``\ メソッド実行でも構いません。
+
+顔画像を以下のように送ってください。
+
+.. code-block:: console
+
+    $ curl -v -F 'file=@hoge.jpg' http://localhost:8080/duker > after.jpg
+
+画像のフォーマットが認識されない場合は、リクエストパスに拡張子をつけてメディアタイプを明示してください。
+
+.. code-block:: console
+
+    $ curl -v -F 'file=@hoge.jpg' http://localhost:8080/duker.jpg > after.jpg
+
+変換後の\ :file:`after.jpg`\ を開いてください。顔がduke化されていますか？
+
+
+余裕があれば、\ ``FaceTranslator``\ に独自の顔変換ロジックを書いてみましょう。
+
+.. code-block:: java
+
+    class FaceTranslator {
+        // ...
+
+        public static void kusokora(Mat source, Rect r) {
+            // 変換処理
+        }
+    }
+
+Controllerにも以下のメソッドを追加しましょう。
+
+.. code-block:: java
+
+    @RequestMapping(value = "/kusokora", method = RequestMethod.POST)
+    BufferedImage kusokora(@RequestParam Part file) throws IOException {
+        Mat source = Mat.createFrom(ImageIO.read(file.getInputStream()));
+        faceDetector.detectFaces(source, FaceTranslator::kusokora);
+        BufferedImage image = source.getBufferedImage();
+        return image;
+    }
+
+以上で本章は終了です。
 
 本章の内容を修了したらハッシュタグ「#kanjava_sbc #sbc03」をつけてツイートしてください。
+
+次はこの顔変換処理を非同期で行うようにします。次章ではその前段として、Spring BootでJMSを使う方法を学びます。
