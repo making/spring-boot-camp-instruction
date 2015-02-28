@@ -202,6 +202,7 @@ Spring 4.1からJMSのMessageListenerはとても書きやすくなり、Listene
 
     本章で使用した\ ``JmsMessagingTemplate``\ は、昔からあるSpringのJMS APIラッパーである\ ``JmsTemplate``\ をメッセージング抽象化機構でさらにラップしたものです。Spring 4.1から追加されました。
     メッセージ操作の用のシグニチャ(\ ``MessageSendingOperations``\ など)や送信する\ ``Message``\ クラスはJMSに限らず、次に説明するSTOMPなどSpringのメッセージング関連のプログラミングで使用できます。
+    このメッセージング抽象化プロジェクトはspring-messagingと名付けられ、Spring 4.0から入りました。
 
     Spring 4.1で追加されたJMS連携機能やspring-messagingについてはこちらの\ `資料 <http://www.slideshare.net/makingx/springone-2gx-2014-spring-41-jsug/44>`_\ を参照してください。
 
