@@ -26,7 +26,7 @@ JMSで画像変換を非同期処理
 * \ ``Map``\
 * \ ``Serializable``\
 
-の変換に対応しています。今回は非効率ですが、送られた\ ``javax.servlet.http.Part``\ から取得した画像データを\ ``byte``\ 配列に変換し、
+の変換に対応しています。今回は非効率的ですが、送られた\ ``javax.servlet.http.Part``\ から取得した画像データを\ ``byte``\ 配列に変換し、
 MessageListener側で\ ``byte``\ 配列から\ ``BufferedImage``\ に変換し、OpenCVに渡します。
 
 まずはControllerにリクエスト受付処理を追加しましょう。
@@ -93,7 +93,7 @@ MessageListener側で\ ``byte``\ 配列から\ ``BufferedImage``\ に変換し�
 
 .. code-block:: console
 
-    $ curl -F 'file=@hoge.jpg' localhost:8080/queue > hoge.jpg
+    $ curl -F 'file=@hoge.jpg' localhost:8080/queue
     OK
 
 サーバーログは以下のようになります。
