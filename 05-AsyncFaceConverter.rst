@@ -83,8 +83,8 @@ MessageListener側で\ ``byte``\ 配列から\ ``BufferedImage``\ に変換し�
             try (InputStream stream = new ByteArrayInputStream(message.getPayload())) { // byte[] -> InputStream
                 Mat source = Mat.createFrom(ImageIO.read(stream)); // InputStream -> BufferedImage -> Mat
                 faceDetector.detectFaces(source, FaceTranslator::duker);
-                BufferedImage image = new BufferedImage(source.cols(), source.rows(), source.getBufferedImageType());
-                source.copyTo(image);
+                BufferedImage image = source.getBufferedImage();
+                // do nothing...
             }
         }
     }
@@ -155,8 +155,8 @@ JVMが落ちていることと、\ ``cv::HaarEvaluator::operator()(int)``\ が�
         try (InputStream stream = new ByteArrayInputStream(message.getPayload())) {
             Mat source = Mat.createFrom(ImageIO.read(stream));
             faceDetector.detectFaces(source, FaceTranslator::duker); // この中の処理がスレッドアンセーフ!
-            BufferedImage image = new BufferedImage(source.cols(), source.rows(), source.getBufferedImageType());
-            source.copyTo(image);
+            BufferedImage image = source.getBufferedImage();
+            // do nothing...
         }
     }
 
