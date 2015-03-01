@@ -7,7 +7,7 @@ WebRTCで撮った写真を顔変換サービスに送信
 その画像を宛先\ ``app/faceConverter``\ へ送ります(サーバーサイドの処理は後ほど追加します)。
 
 .. code-block:: html
-    :emphasize-lines: 13-16,23-25,33-38,43-55,75-76,90-98,125,128-147
+    :emphasize-lines: 13-16,23-25,33-38,43-55,125,128-147
 
     <!DOCTYPE html>
     <html>
