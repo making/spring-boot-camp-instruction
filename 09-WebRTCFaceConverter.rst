@@ -151,7 +151,7 @@ WebRTCで撮った写真を顔変換サービスに送信
          */
         HelloStomp.prototype.sendFace = function (dataUrl) {
             if (this.stompClient) {
-                this.stompClient.send("/app/faceConverter", {}, dataUrl.replace(/^.*,/, ''));
+                this.stompClient.send("/app/faceConverter", {}, dataUrl.replace(/^.*,/, '')); // 宛先'/app/faceConverter'へメッセージを送信
             } else {
                 alert('not connected!');
             }
@@ -166,6 +166,7 @@ WebRTCで撮った写真を顔変換サービスに送信
 Base64でエンコードされた画像を\ ``byte[]``\ にデコードして、JMSのMessageListenerへ送信するだけです。
 
 .. code-block:: java
+    :emphasize-lines: 6-10
 
     @SpringBootApplication
     @RestController
