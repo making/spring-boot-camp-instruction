@@ -26,11 +26,11 @@
     RUN yum -y localinstall /tmp/jdk-8u31-linux-x64.rpm
     RUN rm -f /tmp/jdk-8u31-linux-x64.rpm
 
-    ADD faceduker.jar /opt/faceduker/
-    ADD classes/haarcascade_frontalface_default.xml /opt/faceduker/
+    ADD faceduker.jar /opt/kusokora/
+    ADD classes/haarcascade_frontalface_default.xml /opt/kusokora/
     EXPOSE 8080
-    WORKDIR /opt/faceduker/
-    CMD ["java", "-Xms512m", "-Xmx1g", "-jar", "faceduker.jar", "--classifierFile=haarcascade_frontalface_default.xml"]
+    WORKDIR /opt/kusokora/
+    CMD ["java", "-Xms512m", "-Xmx1g", "-jar", "kusokora.jar", "--classifierFile=haarcascade_frontalface_default.xml"]
 
 Docker上はLinux(CentOS 7)を使用するので、Linux用にアプリケーションをビルドします。
 
