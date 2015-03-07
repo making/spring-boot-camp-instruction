@@ -190,7 +190,7 @@ Base64でエンコードされた画像を\ ``byte[]``\ にデコードして、
 最後に、カメラ画像だけでなく、ローカルファイルも送信できるように機能追加しましょう。\ :file:`face.html`\ を以下のように修正してください。
 
 .. code-block:: html
-    :emphasize-lines: 17,34,45,150-164
+    :emphasize-lines: 17,34,45,126,150-164
 
     <!DOCTYPE html>
     <html>
