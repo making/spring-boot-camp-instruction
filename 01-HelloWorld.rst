@@ -108,7 +108,7 @@ Spring BootプロジェクトをMaven Archetypeから作ります。今回は拙
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
                     <dependencies>
-                        <dependency>
+                        <dependency><!-- Java SE 8u40だと動きません。ここの設定を削除してください https://github.com/spring-projects/spring-loaded/issues/108 -->
                             <groupId>org.springframework</groupId>
                             <artifactId>springloaded</artifactId>
                             <version>${spring-loaded.version}</version>
