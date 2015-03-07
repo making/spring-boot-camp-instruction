@@ -1,6 +1,8 @@
 Dockerを使ってみる
 ********************************************************************************
 
-後で書く。基本的には\ `こちら <http://qiita.com/making@github/items/e584cb0854bf80809498>`_\ の内容。
+いつか書く。基本的には\ `こちら <http://qiita.com/making@github/items/e584cb0854bf80809498>`_\ の内容。
+
+「\ :doc:`01-HelloWorld`\ 」の内容に戻って、AWS Elastic Beanstalkへデプロイしてみてください。
 
 本章の内容を修了したらハッシュタグ「#kanjava_sbc #sbc10」をつけてツイートしてください。
