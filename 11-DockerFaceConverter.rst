@@ -26,7 +26,7 @@
     RUN yum -y localinstall /tmp/jdk-8u31-linux-x64.rpm
     RUN rm -f /tmp/jdk-8u31-linux-x64.rpm
 
-    ADD faceduker.jar /opt/kusokora/
+    ADD kusokora.jar /opt/kusokora/
     ADD classes/haarcascade_frontalface_default.xml /opt/kusokora/
     EXPOSE 8080
     WORKDIR /opt/kusokora/
